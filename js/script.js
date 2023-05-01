@@ -79,6 +79,7 @@ class Keyboard {
         { key: "bracket-left", value: "[" },
         { key: "bracket-right", value: "]" },
         { key: "backslash", value: "\\" },
+        { key: "delete", value: "Del", wide: true },
       ],
       [
         { key: "caps-lock", value: "Caps Lock", wide: true },
@@ -137,24 +138,72 @@ class Keyboard {
         keyElement.addEventListener("click", () => {
           // Handling button click event
           if (
-            keyData.key === "backspace" ||
-            keyData.key === "tab" ||
-            keyData.key === "caps-lock" ||
-            keyData.key === "enter" ||
-            keyData.key === "shift-left" ||
-            keyData.key === "shift-right" ||
-            keyData.key === "ctrl-left" ||
-            keyData.key === "window" ||
-            keyData.key === "alt-left" ||
-            keyData.key === "alt-right" ||
-            keyData.key === "ctrl-right"
+            ["backspace", "tab", "delete", "caps-lock", "enter"].includes(
+              keyData.key
+            )
           ) {
-            // Handle special keys here
+            const startPosition = this.textarea.selectionStart;
+            const endPosition = this.textarea.selectionEnd;
+            switch (keyData.key) {
+              case "backspace":
+                if (startPosition !== endPosition) {
+                  this.textarea.value =
+                    this.textarea.value.slice(0, startPosition) +
+                    this.textarea.value.slice(endPosition);
+                  this.textarea.setSelectionRange(startPosition, startPosition); // Set cursor position after deletion
+                } else if (startPosition > 0) {
+                  this.textarea.value =
+                    this.textarea.value.slice(0, startPosition - 1) +
+                    this.textarea.value.slice(startPosition);
+                  this.textarea.setSelectionRange(
+                    startPosition - 1,
+                    startPosition - 1
+                  ); // Set cursor position after deletion
+                }
+                break;
+
+              case "tab":
+                this.textarea.value =
+                  this.textarea.value.slice(0, startPosition) +
+                  "\t" +
+                  this.textarea.value.slice(endPosition);
+                this.textarea.setSelectionRange(
+                  startPosition + 1,
+                  startPosition + 1
+                );
+                break;
+              case "delete":
+                if (startPosition !== endPosition) {
+                  this.textarea.value =
+                    this.textarea.value.slice(0, startPosition) +
+                    this.textarea.value.slice(endPosition);
+                } else if (startPosition < this.textarea.value.length) {
+                  this.textarea.value =
+                    this.textarea.value.slice(0, startPosition) +
+                    this.textarea.value.slice(startPosition + 1);
+                }
+                this.textarea.setSelectionRange(startPosition, startPosition); // Set cursor position after deletion
+                break;
+              case "caps-lock":
+                // Implement caps lock behavior here
+                break;
+              case "enter":
+                this.textarea.value =
+                  this.textarea.value.slice(0, startPosition) +
+                  "\n" +
+                  this.textarea.value.slice(endPosition);
+                this.textarea.setSelectionRange(
+                  startPosition + 1,
+                  startPosition + 1
+                ); // Set cursor position after the new line
+                break;
+            }
           } else {
             // Append the character value to the textarea
             this.textarea.value += keyData.value;
-            this.textarea.focus(); // Set the focus back to the textarea after appending the character
           }
+
+          this.textarea.focus(); // Set the focus back to the textarea after appending the character
         });
 
         rowElement.appendChild(keyElement);
@@ -164,38 +213,93 @@ class Keyboard {
 
   addPhysicalKeyboardListener() {
     window.addEventListener("keydown", (event) => {
-      event.preventDefault(); // Prevent default behavior
+      let key = event.code.toLowerCase();
+      if (key === "space") key = "space";
+      if (key === "metaleft" || key === "metaright") key = "window";
+      if (key.startsWith("key")) key = key.slice(3);
+      if (key.startsWith("digit")) key = key.slice(5);
+      if (key === "arrowleft") key = "left-arr";
+      if (key === "arrowright") key = "right-arr";
+      if (key === "arrowup") key = "up-arr";
+      if (key === "arrowdown") key = "down-arr";
 
-      const key = event.key.toLowerCase();
       const keyElement = document.querySelector(
         `.keyboard__key[data-key="${key}"]`
       );
 
       if (keyElement) {
+        event.stopPropagation();
+        event.preventDefault(); // Prevent default behavior
+
         // Highlight the corresponding button on the virtual keyboard
         keyElement.classList.add("keyboard__key--active");
 
-        // Append the character value to the textarea for non-special keys
-        if (
-          ![
-            "backspace",
-            "tab",
-            "capslock",
-            "enter",
-            "shift",
-            "control",
-            "alt",
-            "meta",
-          ].includes(key)
-        ) {
+        // Handle special keys
+        const startPosition = this.textarea.selectionStart;
+        const endPosition = this.textarea.selectionEnd;
+
+        if (["backspace", "tab", "enter", "delete"].includes(key)) {
+          switch (key) {
+            case "backspace":
+              if (startPosition !== endPosition) {
+                this.textarea.value =
+                  this.textarea.value.slice(0, startPosition) +
+                  this.textarea.value.slice(endPosition);
+                this.textarea.setSelectionRange(startPosition, startPosition);
+              } else if (startPosition > 0) {
+                this.textarea.value =
+                  this.textarea.value.slice(0, startPosition - 1) +
+                  this.textarea.value.slice(startPosition);
+                this.textarea.setSelectionRange(
+                  startPosition - 1,
+                  startPosition - 1
+                );
+              }
+              break;
+            case "tab":
+              this.textarea.value =
+                this.textarea.value.slice(0, startPosition) +
+                "\t" +
+                this.textarea.value.slice(endPosition);
+              this.textarea.setSelectionRange(
+                startPosition + 1,
+                startPosition + 1
+              );
+              break;
+            case "enter":
+              this.textarea.value =
+                this.textarea.value.slice(0, startPosition) +
+                "\n" +
+                this.textarea.value.slice(endPosition);
+              this.textarea.setSelectionRange(
+                startPosition + 1,
+                startPosition + 1
+              );
+              break;
+            case "delete":
+              if (startPosition !== endPosition) {
+                this.textarea.value =
+                  this.textarea.value.slice(0, startPosition) +
+                  this.textarea.value.slice(endPosition);
+              } else if (startPosition < this.textarea.value.length) {
+                this.textarea.value =
+                  this.textarea.value.slice(0, startPosition) +
+                  this.textarea.value.slice(startPosition + 1);
+              }
+              this.textarea.setSelectionRange(startPosition, startPosition);
+              break;
+          }
+        } else {
+          // Append the character value to the textarea for non-special keys
           this.textarea.value += event.key;
-          this.textarea.focus();
         }
 
         // Remove highlight after a short delay
         setTimeout(() => {
           keyElement.classList.remove("keyboard__key--active");
         }, 100);
+
+        this.textarea.focus();
       }
     });
   }
