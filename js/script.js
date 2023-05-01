@@ -114,7 +114,7 @@ class Keyboard {
         { key: "m", value: "m" },
         { key: "comma", value: "," },
         { key: "dot", value: "." },
-        { key: "up-arr", value: "&uarr;" },
+        { key: "up-arr", value: "↑" },
         { key: "shift-right", value: "Shift", wide: true },
       ],
       [
@@ -123,9 +123,9 @@ class Keyboard {
         { key: "alt-left", value: "Alt", wide: true },
         { key: "space", value: "Space", wide: true },
         { key: "alt-right", value: "Alt", wide: true },
-        { key: "left-arr", value: "&larr;" },
-        { key: "down-arr", value: "&darr;" },
-        { key: "right-arr", value: "&rarr;" },
+        { key: "left-arr", value: "←" },
+        { key: "down-arr", value: "↓" },
+        { key: "right-arr", value: "→" },
         { key: "ctrl-right", value: "Ctrl", wide: true },
       ],
     ];
@@ -148,13 +148,45 @@ class Keyboard {
         keyElement.addEventListener("click", () => {
           // Handling button click event
           if (
-            ["backspace", "tab", "delete", "caps-lock", "enter"].includes(
-              keyData.key
-            )
+            [
+              "ctrl-left",
+              "ctrl-right",
+              "alt-left",
+              "alt-right",
+              "shift-left",
+              "shift-right",
+              "window",
+            ].includes(keyData.key)
+          ) {
+            // Do nothing for these special keys
+            return;
+          }
+
+          // Handling button click event
+          if (
+            [
+              "backspace",
+              "tab",
+              "delete",
+              "caps-lock",
+              "enter",
+              "space",
+            ].includes(keyData.key)
           ) {
             const startPosition = this.textarea.selectionStart;
             const endPosition = this.textarea.selectionEnd;
             switch (keyData.key) {
+              case "space":
+                this.textarea.value =
+                  this.textarea.value.slice(0, startPosition) +
+                  " " +
+                  this.textarea.value.slice(endPosition);
+                this.textarea.setSelectionRange(
+                  startPosition + 1,
+                  startPosition + 1
+                ); // Set cursor position after the space
+                break;
+
               case "backspace":
                 if (startPosition !== endPosition) {
                   this.textarea.value =
