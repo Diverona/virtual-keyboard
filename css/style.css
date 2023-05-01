@@ -84,10 +84,6 @@ p {
   padding-right: 1rem;
 }
 
-/* .keyboard__key:hover {
-  background-color: #555;
-} */
-
 button[data-key="shift-left"],
 button[data-key="shift-right"] {
   width: 93px;
