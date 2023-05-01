@@ -135,6 +135,9 @@ class Keyboard {
         keyElement.dataset.key = keyData.key;
         keyElement.innerHTML = keyData.value;
 
+        // Добавить ключ в массив keys
+        this.keys.push(keyElement);
+
         keyElement.addEventListener("click", () => {
           // Handling button click event
           if (
@@ -172,6 +175,7 @@ class Keyboard {
                   startPosition + 1
                 );
                 break;
+
               case "delete":
                 if (startPosition !== endPosition) {
                   this.textarea.value =
@@ -184,9 +188,11 @@ class Keyboard {
                 }
                 this.textarea.setSelectionRange(startPosition, startPosition); // Set cursor position after deletion
                 break;
+
               case "caps-lock":
-                // Implement caps lock behavior here
+                this.toggleCapsLock(); // Implement caps lock behavior here
                 break;
+
               case "enter":
                 this.textarea.value =
                   this.textarea.value.slice(0, startPosition) +
@@ -200,7 +206,9 @@ class Keyboard {
             }
           } else {
             // Append the character value to the textarea
-            this.textarea.value += keyData.value;
+            this.textarea.value += this.capsLock
+              ? keyData.value.toUpperCase()
+              : keyData.value;
           }
 
           this.textarea.focus(); // Set the focus back to the textarea after appending the character
@@ -208,6 +216,23 @@ class Keyboard {
 
         rowElement.appendChild(keyElement);
       });
+    });
+  }
+
+  toggleCapsLock() {
+    this.capsLock = !this.capsLock;
+    const capsLockKey = document.querySelector(
+      '.keyboard__key[data-key="caps-lock"]'
+    );
+    capsLockKey.classList.toggle("keyboard__key--active");
+
+    this.keys.forEach((key) => {
+      const keyValue = key.innerHTML;
+      if (keyValue.length === 1 && keyValue.match(/[a-zа-яё]/i)) {
+        key.innerHTML = this.capsLock
+          ? keyValue.toUpperCase()
+          : keyValue.toLowerCase();
+      }
     });
   }
 
@@ -222,6 +247,12 @@ class Keyboard {
       if (key === "arrowright") key = "right-arr";
       if (key === "arrowup") key = "up-arr";
       if (key === "arrowdown") key = "down-arr";
+      // Обработка события Caps Lock
+      if (event.code.toLowerCase() === "capslock") {
+        this.toggleCapsLock();
+        event.stopPropagation();
+        event.preventDefault();
+      }
 
       const keyElement = document.querySelector(
         `.keyboard__key[data-key="${key}"]`
@@ -297,7 +328,7 @@ class Keyboard {
         // Remove highlight after a short delay
         setTimeout(() => {
           keyElement.classList.remove("keyboard__key--active");
-        }, 100);
+        }, 200);
 
         this.textarea.focus();
       }
