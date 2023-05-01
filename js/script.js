@@ -161,6 +161,44 @@ class Keyboard {
       });
     });
   }
+
+  addPhysicalKeyboardListener() {
+    window.addEventListener("keydown", (event) => {
+      event.preventDefault(); // Prevent default behavior
+
+      const key = event.key.toLowerCase();
+      const keyElement = document.querySelector(
+        `.keyboard__key[data-key="${key}"]`
+      );
+
+      if (keyElement) {
+        // Highlight the corresponding button on the virtual keyboard
+        keyElement.classList.add("keyboard__key--active");
+
+        // Append the character value to the textarea for non-special keys
+        if (
+          ![
+            "backspace",
+            "tab",
+            "capslock",
+            "enter",
+            "shift",
+            "control",
+            "alt",
+            "meta",
+          ].includes(key)
+        ) {
+          this.textarea.value += event.key;
+          this.textarea.focus();
+        }
+
+        // Remove highlight after a short delay
+        setTimeout(() => {
+          keyElement.classList.remove("keyboard__key--active");
+        }, 100);
+      }
+    });
+  }
 }
 
 window.addEventListener("DOMContentLoaded", function () {
