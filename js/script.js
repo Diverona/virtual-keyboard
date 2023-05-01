@@ -31,12 +31,19 @@ class Keyboard {
     const title = document.createElement("h1");
     title.className = "title";
     title.innerHTML = "Virtual Keyboard";
+    const text1 = document.createElement("p");
+    const text2 = document.createElement("p");
+    text1.innerHTML = "Клавиатура создана в операционной системе Windows";
+    text2.innerHTML = "Для переключения языка комбинация: ctrl + alt";
+
     container.appendChild(title);
     container.appendChild(this.container);
     this.container.appendChild(this.textarea);
     this.container.appendChild(this.rowsContainer);
     main.appendChild(container);
     document.body.appendChild(main);
+    container.append(text1);
+    container.append(text2);
 
     this.keys = [];
     this.currentLanguage = "english";
